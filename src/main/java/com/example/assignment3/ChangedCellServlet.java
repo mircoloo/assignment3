@@ -28,22 +28,26 @@ public class ChangedCellServlet extends HttpServlet {
 
         Set<Cell> modified = spreadsheet.modifyCellAndPrint(id,formula);
 
-        //JSONbject js = new JSONbject();
-        HashMap<String, String> json = new HashMap<String, String>();
-        String toRet = "{";
-        for(Cell c : modified){
-            System.out.println(c.id + " " + c.value);
-            String jsonString = new JSONObject();
-            toRet += c.id + ":" + c.value + ",";
-                    jsonString.put("JSON1", "Hello World!")
-                    .put("JSON2", "Hello my World!")
-                    .put("JSON3", new JSONObject().put("key1", "value1"))
-                    .toString();
-        }
-        toRet += "}";
+
+        //Transform the modified cells to a json response
+        String toRet = toJson(modified);
+        System.out.println(toRet);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(toRet);
+     }
+
+     public String toJson(Set<Cell> a){
+         String toRet = "{";
+         Cell[] modifiedArray =  new Cell[a.size()];
+         a.toArray(modifiedArray);
+         for(int i = 0; i < a.size()-1; i++){
+             toRet += "\"" + modifiedArray[i].id + "\"" + ":" + modifiedArray[i].value + ",";
+         }
+         toRet += "\"" + modifiedArray[modifiedArray.length-1].id + "\"" + ":"  + modifiedArray[modifiedArray.length-1].value;
+         toRet += "}";
+
+         return toRet;
      }
 }

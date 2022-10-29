@@ -14,37 +14,9 @@
     <title>Assignment 3</title>
 </head>
 <body>
-
-<input type="text" id="input-cell" onchange="changeInput(event)"></input>
-<table border="1">
-    <tbody>
-    <tr>
-        <td id="A1" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="B1" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="C1" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="D1" class="cell" onclick="highlightBorder(event)"></td>
-    </tr>
-    <tr>
-        <td id="A2" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="B2" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="C2" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="D2" class="cell" onclick="highlightBorder(event)"></td>
-    </tr>
-    <tr>
-        <td id="A3" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="B3" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="C3" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="D3" class="cell" onclick="highlightBorder(event)"></td>
-    </tr>
-    <tr>
-        <td id="A4" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="B4" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="C4" class="cell" onclick="highlightBorder(event)"></td>
-        <td id="D4" class="cell" onclick="highlightBorder(event)"></td>
-    </tr>
-
-    </tbody>
-</table>
+<h1>Mini spreadsheet</h1>
+<input type="text" id="input-cell" onchange="changeInput(event)" onkeyup="reflectInput(event)"></input>
+<jsp:include page="spreadsheet.jsp"></jsp:include>
 
 <script>
 
@@ -53,7 +25,6 @@
     function highlightBorder(e){
         currentSelected = e.target
         input.value = currentSelected.innerText;
-        //element.style.borderStyle = "solid blue 4px"
         resetCells();
         currentSelected.style.color = "green"
     }
@@ -66,32 +37,40 @@
     }
 
     function changeInput(e){
-        console.log(e.target.value)
         currentSelected.innerText = e.target.value;
         let xhttp = new XMLHttpRequest();
 
         xhttp.onreadystatechange = function (){
             var jsonResponse = this.response;
-            //let jsonData = JSON.parse(jsonResponse);
             updateCells(jsonResponse)
         }
-
         xhttp.open("POST", "ChangedCellServlet", true);
         xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        console.log(input.value.toString())
         let req_string = "id=" + currentSelected.id.toString() + "&formula=" +  input.value;
         xhttp.send(req_string);
     }
 
+    function reflectInput(e) {
+        currentSelected.innerText = input.value;
+    }
+
     function updateCells(data){
-        let toModify = JSON.parse('{"name":"John", "age":30, "city":"New York",}')
-        console.log(data);
+            try{
+                if(data != ""){
+                    const obj = JSON.parse(data);
+                    for (let [key, value] of Object.entries(obj)) {
+                        console.log("->" ,key, value);
+                        document.querySelector("#" + key).innerText = value
+                    }
+                }
+            }catch (e){
+                console.log((e))
+            }
+
     }
 
 
 
-</script>
-
-
+    </script>
 </body>
 </html>
