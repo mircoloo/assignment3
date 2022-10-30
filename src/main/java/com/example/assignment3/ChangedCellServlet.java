@@ -14,28 +14,39 @@ public class ChangedCellServlet extends HttpServlet {
     SSEngine spreadsheet = SSEngine.getSSEngine();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        //request.getRequestDispatcher("index.jsp").forward(request, response);
-        System.out.println("changed cell request");
+        try{
+
+            ServletContext ctx=getServletContext();
+            SSEngine spreadsheet = (SSEngine)ctx.getAttribute("sEngine");
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(spreadsheet.cellToJsonStr());
+        }catch(Exception e){e.printStackTrace();}
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("changed cell request post");
-        String id = request.getParameter("id");
-        String formula = request.getParameter("formula");
+        try{
+            ServletContext ctx = getServletContext();
+            SSEngine spreadsheet = (SSEngine) ctx.getAttribute("sEngine");
+            String id = request.getParameter("id");
+            String formula = request.getParameter("formula");
 
-        //System.out.println(id + " " + formula);
+            //System.out.println(id + " " + formula);
 
-        Set<Cell> modified = spreadsheet.modifyCellAndPrint(id,formula);
+            Set<Cell> modified = spreadsheet.modifyCell(id,formula);
+            //Transform the modified cells to a json response
+            String toRet = spreadsheet.cellToJsonStr();
+            //System.out.println(toRet);
+
+            ctx.setAttribute("sEngine", spreadsheet);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(toRet);
+
+        }catch (Exception e){e.printStackTrace();}
 
 
-        //Transform the modified cells to a json response
-        String toRet = toJson(modified);
-        System.out.println(toRet);
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(toRet);
      }
 
      public String toJson(Set<Cell> a){
@@ -50,4 +61,7 @@ public class ChangedCellServlet extends HttpServlet {
 
          return toRet;
      }
+
+
+
 }

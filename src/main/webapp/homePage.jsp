@@ -20,11 +20,17 @@
 
 <script>
 
+
+
+    var cells = [];
+    var firstReq = true;
     var currentSelected;
     var input = document.querySelector("#input-cell");
+
+
     function highlightBorder(e){
         currentSelected = e.target
-        input.value = currentSelected.innerText;
+        input.value = cells.filter( (c) => c.id == currentSelected.id )[0].formula
         resetCells();
         currentSelected.style.color = "green"
     }
@@ -36,38 +42,64 @@
         }
     }
 
+    function requestCellsUpdate(){
+        let xhttp = new XMLHttpRequest();
+
+        xhttp.onreadystatechange = function (){
+            var jsonResponse = this.response;
+            updateCells(jsonResponse);
+        }
+        xhttp.open("GET", "ChangedCellServlet", true);
+        xhttp.send();
+    }
+
+
+
     function changeInput(e){
-        currentSelected.innerText = e.target.value;
+        currentSelected.innerText = e.target.id
         let xhttp = new XMLHttpRequest();
 
         xhttp.onreadystatechange = function (){
             var jsonResponse = this.response;
             updateCells(jsonResponse)
         }
-        xhttp.open("POST", "ChangedCellServlet", true);
+        xhttp.open("POST", "ChangedCellServlet");
         xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         let req_string = "id=" + currentSelected.id.toString() + "&formula=" +  input.value;
         xhttp.send(req_string);
     }
 
     function reflectInput(e) {
-        currentSelected.innerText = input.value;
+        //currentSelected.innerText = input.value;
     }
+
+
 
     function updateCells(data){
             try{
                 if(data != ""){
-                    const obj = JSON.parse(data);
-                    for (let [key, value] of Object.entries(obj)) {
-                        console.log("->" ,key, value);
-                        document.querySelector("#" + key).innerText = value
+                    const jsonParsed = JSON.parse(data);
+                    if (firstReq){
+                        jsonParsed.map( (cell) => cells.push(cell))
+                        firstReq = false
                     }
+
+                    jsonParsed.map( (cellToUpdate) => {
+                        let c = cells.filter( (cell) => cell.id == cellToUpdate.id)[0]
+                        c.value, document.querySelector("#" + c.id).innerText = cellToUpdate.value;
+                        c.formula = cellToUpdate.formula;
+                    }
+                    )
+
+                    console.log(cells)
+
                 }
             }catch (e){
                 console.log((e))
             }
 
     }
+    requestCellsUpdate();
 
 
 

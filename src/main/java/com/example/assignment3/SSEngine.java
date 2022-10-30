@@ -30,7 +30,6 @@ public class SSEngine {
 
     public Set<Cell> modifyCell(String id, String formula) {
         LinkedList<Cell> affectedCells=new LinkedList<>();
-        //System.out.println("Trying to apply "+formula+" to "+id);
         Cell theCell=cellMap.get(id);
         Cell clone=theCell.clone();
         theCell.setFormula(formula);
@@ -87,11 +86,36 @@ public class SSEngine {
         System.out.println(engine.cellMap.get(id));
         return modifiedCells;
     }
+
+    public String cellToJsonStr(){
+        String toRet = "[";
+        Cell[] modifiedArray =  new Cell[cellMap.size()];
+        int i = 0;
+        for (String key: cellMap.keySet()){
+            //System.out.println(cellMap.get(key));
+            modifiedArray[i] = cellMap.get(key);
+            i++;
+        }
+
+
+        for(i = 0; i < modifiedArray.length-1; i++){
+            toRet += "{\"" + "id" + "\"" + ":\"" + modifiedArray[i].id + "\",";
+            toRet += "\"" + "value" + "\"" + ":\"" + modifiedArray[i].value + "\",";
+            toRet += "\"" + "formula" + "\"" + ":\"" + modifiedArray[i].formula + "\"},";
+        }
+        toRet += "{\"" + "id" + "\"" + ":\"" + modifiedArray[i].id + "\",";
+        toRet += "\"" + "value" + "\"" + ":\"" + modifiedArray[i].value + "\",";
+        toRet += "\"" + "formula" + "\"" + ":\"" + modifiedArray[i].formula + "\"}]";
+
+        //System.out.println(toRet);
+        return toRet;
+    }
     // ============ TESTING METHOD =============================================
     public static void main(String arg[]){
         // simple elements
         getSSEngine();
-        engine.modifyCellAndPrint("A1","2"); // OK
+        engine.cellToJsonStr();
+        /*engine.modifyCellAndPrint("A1","2"); // OK
         engine.modifyCellAndPrint("B1","=A1"); //OK
 
         // formulas with operators, without circular references
@@ -118,6 +142,7 @@ public class SSEngine {
         engine.modifyCellAndPrint("A1","=A1+B2"); //NO!
         //more complex circular reference
         engine.modifyCellAndPrint("A1","=B1*2"); //NO
-        engine.modifyCellAndPrint("A1","=B3*2"); //NO
+        engine.modifyCellAndPrint("A1","=B3*2"); //NO*/
+
     }
 }
