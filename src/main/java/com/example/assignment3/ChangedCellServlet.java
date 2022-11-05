@@ -1,11 +1,13 @@
 package com.example.assignment3;
 
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.annotation.*;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Set;
 
 @WebServlet(name = "ChangedCellServlet", value = "/ChangedCellServlet")
@@ -31,10 +33,11 @@ public class ChangedCellServlet extends HttpServlet {
             SSEngine spreadsheet = (SSEngine) ctx.getAttribute("sEngine");
             String id = request.getParameter("id");
             String formula = request.getParameter("formula");
+            String timestamp = request.getParameter("timestamp");
 
-            //System.out.println(id + " " + formula);
+            System.out.println(id + " " + formula + " " + timestamp);
 
-            Set<Cell> modified = spreadsheet.modifyCell(id,formula);
+            Set<Cell> modified = spreadsheet.modifyCell(id,formula, timestamp);
             //Transform the modified cells to a json response
             String toRet = spreadsheet.cellToJsonStr();
             //System.out.println(toRet);

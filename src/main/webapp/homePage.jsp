@@ -43,6 +43,7 @@
     }
 
     function requestCellsUpdate(){
+        console.log(Date.now());
         let xhttp = new XMLHttpRequest();
 
         xhttp.onreadystatechange = function (){
@@ -65,7 +66,7 @@
         }
         xhttp.open("POST", "ChangedCellServlet");
         xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        let req_string = "id=" + currentSelected.id.toString() + "&formula=" +  input.value;
+        let req_string = "id=" + currentSelected.id.toString() + "&formula=" +  input.value + "&timestamp=" + Date.now();
         xhttp.send(req_string);
     }
 
@@ -88,19 +89,42 @@
                         let c = cells.filter( (cell) => cell.id == cellToUpdate.id)[0]
                         c.value, document.querySelector("#" + c.id).innerText = cellToUpdate.value;
                         c.formula = cellToUpdate.formula;
+                        c.timestamp = cellToUpdate.timestamp;
                     }
                     )
-
-                    console.log(cells)
-
+                    //console.log(cells)
                 }
             }catch (e){
                 console.log((e))
             }
 
     }
-    requestCellsUpdate();
 
+
+
+    function checkTimestamps(){
+
+        let xhttp = new XMLHttpRequest();
+        var arrayOfObjects = [];
+
+
+        xhttp.onreadystatechange = function (){
+            var jsonResponse = this.response;
+            updateCells(jsonResponse)
+            //  console.log(jsonResponse);
+
+        }
+        xhttp.open("POST", "CheckTimestampServlet");
+        xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        cells.map(  ( cell ) => {
+            arrayOfObjects.push( { "id" : cell.id, "timestamp": cell.timestamp } )   }  )
+        let req_string  = 'objarray=' + JSON.stringify(arrayOfObjects);
+        xhttp.send(req_string);
+
+    }
+
+    requestCellsUpdate();
+    setInterval(checkTimestamps, 10000);
 
 
     </script>

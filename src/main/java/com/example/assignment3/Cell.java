@@ -10,6 +10,9 @@ public class Cell {
     String id;
     String formula;
     int value;
+
+    long timestamp = 0;
+
     SSEngine engine=SSEngine.getSSEngine();
     ArrayList<String> operands=new ArrayList<>();
     ArrayList<String> operators=new ArrayList<>();
@@ -26,6 +29,14 @@ public class Cell {
     public String getFormula() {return formula;}
 
     public int getValue() {return value;}
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
     public String toString() {
         StringBuffer sb = new StringBuffer();

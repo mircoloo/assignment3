@@ -1,9 +1,13 @@
 package com.example.assignment3;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SSEngine {
     private final static String columns[]={"A","B","C","D"};
@@ -28,16 +32,18 @@ public class SSEngine {
     // end of singleton pattern -----------
 
 
-    public Set<Cell> modifyCell(String id, String formula) {
+    public Set<Cell> modifyCell(String id, String formula, String timestamp) {
         LinkedList<Cell> affectedCells=new LinkedList<>();
         Cell theCell=cellMap.get(id);
         Cell clone=theCell.clone();
         theCell.setFormula(formula);
+        theCell.setTimestamp(Long.parseLong(timestamp));
         if (! theCell.checkCircularDependencies(id)) {
             //restore cell
             theCell.formula=clone.formula;
             theCell.id=clone.id;
             theCell.value=clone.value;
+            theCell.timestamp = clone.value;
             return null;
         }
         // remove all the old dependencies, looping over operands before modification
@@ -74,8 +80,8 @@ public class SSEngine {
         dependance.put(c.id,new HashSet<Cell>());
     }
 
-    Set<Cell>  modifyCellAndPrint(String id, String formula) {
-        Set<Cell> modifiedCells=modifyCell(id, formula);
+    Set<Cell>  modifyCellAndPrint(String id, String formula, String timestamp) {
+        Set<Cell> modifiedCells=modifyCell(id, formula, timestamp);
         if (modifiedCells!=null) {
             System.out.print("MODIFIED CELLS: ");
             for (Cell c : modifiedCells) {
@@ -96,22 +102,35 @@ public class SSEngine {
             modifiedArray[i] = cellMap.get(key);
             i++;
         }
-
-
         for(i = 0; i < modifiedArray.length-1; i++){
             toRet += "{\"" + "id" + "\"" + ":\"" + modifiedArray[i].id + "\",";
             toRet += "\"" + "value" + "\"" + ":\"" + modifiedArray[i].value + "\",";
+            toRet += "\"" + "timestamp" + "\"" + ":\"" + modifiedArray[i].timestamp + "\",";
             toRet += "\"" + "formula" + "\"" + ":\"" + modifiedArray[i].formula + "\"},";
         }
         toRet += "{\"" + "id" + "\"" + ":\"" + modifiedArray[i].id + "\",";
         toRet += "\"" + "value" + "\"" + ":\"" + modifiedArray[i].value + "\",";
+        toRet += "\"" + "timestamp" + "\"" + ":\"" + modifiedArray[i].timestamp + "\",";
         toRet += "\"" + "formula" + "\"" + ":\"" + modifiedArray[i].formula + "\"}]";
 
         //System.out.println(toRet);
         return toRet;
     }
+
+
+    boolean isTimestampedDifferent(HashMap<String, Long> ts){
+        AtomicReference<Boolean> toRet = new AtomicReference<>(false);
+        ts.forEach((k,v) -> { if( this.cellMap.get(k).timestamp != v){
+                toRet.set(true);
+            }
+        });
+        return toRet.get();
+    }
     // ============ TESTING METHOD =============================================
     public static void main(String arg[]){
+
+        Gson gson = new GsonBuilder().create();
+
         // simple elements
         getSSEngine();
         engine.cellToJsonStr();
